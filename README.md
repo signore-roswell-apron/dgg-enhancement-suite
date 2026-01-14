@@ -10,4 +10,6 @@ A Tampermonkey script to enhance the Destiny.gg experience.
 
 ## Features
 
-- **Mention Sound Notifications** - Plays a notification sound when someone mentions your username in chat. Can be toggled on/off in the chat settings panel.
+- **Mention Sound Notifications** - Plays a notification sound when someone mentions your username in chat. Can be toggled on/off in the chat settings panel. Enabled by default.
+- **Hide New Users** - Hides messages from new users (flair58). Your own messages are never hidden. Disabled by default.
+- **Hide White Names** - Hides messages from users without any flair. Your own messages are never hidden. Disabled by default.

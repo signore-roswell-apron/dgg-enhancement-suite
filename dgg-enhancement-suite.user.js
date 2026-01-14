@@ -53,8 +53,72 @@ const main = function () {
 
   // Initialize settings with defaults if not present
   if (localStorage.getItem(SETTINGS_KEY) === null) {
-    saveSettings({ mentionSound: true });
+    saveSettings({ mentionSound: true, hideNewUsers: false, hideWhiteNames: false });
   }
+
+  // Scroll chat to bottom
+  function scrollChatToBottom() {
+    const chatLines = document.querySelector(".chat-lines");
+    if (chatLines) {
+      chatLines.scrollTop = chatLines.scrollHeight;
+    }
+  }
+
+  // CSS for hiding new users (flair58)
+  const hideNewUsersStyle = document.createElement("style");
+  hideNewUsersStyle.id = "dgges-hide-new-users";
+
+  function applyHideNewUsers() {
+    const existing = document.getElementById("dgges-hide-new-users");
+    if (getSetting("hideNewUsers", false)) {
+      // Build selector that excludes current user's messages
+      let selector = `.msg-chat:has(.flair58)`;
+      if (!MY_USERNAME) {
+        MY_USERNAME = getMyUsername();
+      }
+      if (MY_USERNAME) {
+        selector = `.msg-chat:has(.flair58):not([data-username="${MY_USERNAME}"])`;
+      }
+      hideNewUsersStyle.textContent = `${selector} { display: none !important; }`;
+      if (!existing) {
+        document.head.appendChild(hideNewUsersStyle);
+      }
+    } else {
+      if (existing) {
+        existing.remove();
+      }
+    }
+  }
+
+  // CSS for hiding white names (users without any flair class)
+  const hideWhiteNamesStyle = document.createElement("style");
+  hideWhiteNamesStyle.id = "dgges-hide-white-names";
+
+  function applyHideWhiteNames() {
+    const existing = document.getElementById("dgges-hide-white-names");
+    if (getSetting("hideWhiteNames", false)) {
+      // Build selector that excludes current user's messages
+      let selector = `.msg-chat.msg-user:not([class*="flair"])`;
+      if (!MY_USERNAME) {
+        MY_USERNAME = getMyUsername();
+      }
+      if (MY_USERNAME) {
+        selector = `.msg-chat.msg-user:not([class*="flair"]):not([data-username="${MY_USERNAME}"])`;
+      }
+      hideWhiteNamesStyle.textContent = `${selector} { display: none !important; }`;
+      if (!existing) {
+        document.head.appendChild(hideWhiteNamesStyle);
+      }
+    } else {
+      if (existing) {
+        existing.remove();
+      }
+    }
+  }
+
+  // Apply settings on load
+  applyHideNewUsers();
+  applyHideWhiteNames();
 
   // Create audio element for notification using base64 sound defined at bottom of file
   // Convert base64 to blob URL to avoid CSP blocking data: URIs
@@ -209,9 +273,55 @@ const main = function () {
 
     formGroup.appendChild(testBtn);
 
+    // Hide new users checkbox
+    const hideNewUsersGroup = document.createElement("div");
+    hideNewUsersGroup.className = "form-group checkbox";
+
+    const hideNewUsersCheckbox = document.createElement("input");
+    hideNewUsersCheckbox.type = "checkbox";
+    hideNewUsersCheckbox.checked = getSetting("hideNewUsers", false);
+    hideNewUsersCheckbox.addEventListener("change", () => {
+      setSetting("hideNewUsers", hideNewUsersCheckbox.checked);
+      applyHideNewUsers();
+      scrollChatToBottom();
+    });
+
+    const hideNewUsersLabel = document.createElement("label");
+    hideNewUsersLabel.title = "Hide messages from new users (flair58)";
+    hideNewUsersLabel.style.display = "inline";
+    hideNewUsersLabel.style.verticalAlign = "text-bottom";
+    hideNewUsersLabel.textContent = " Hide new users";
+
+    hideNewUsersGroup.appendChild(hideNewUsersCheckbox);
+    hideNewUsersGroup.appendChild(hideNewUsersLabel);
+
+    // Hide white names checkbox
+    const hideWhiteNamesGroup = document.createElement("div");
+    hideWhiteNamesGroup.className = "form-group checkbox";
+
+    const hideWhiteNamesCheckbox = document.createElement("input");
+    hideWhiteNamesCheckbox.type = "checkbox";
+    hideWhiteNamesCheckbox.checked = getSetting("hideWhiteNames", false);
+    hideWhiteNamesCheckbox.addEventListener("change", () => {
+      setSetting("hideWhiteNames", hideWhiteNamesCheckbox.checked);
+      applyHideWhiteNames();
+      scrollChatToBottom();
+    });
+
+    const hideWhiteNamesLabel = document.createElement("label");
+    hideWhiteNamesLabel.title = "Hide messages from users without any flair";
+    hideWhiteNamesLabel.style.display = "inline";
+    hideWhiteNamesLabel.style.verticalAlign = "text-bottom";
+    hideWhiteNamesLabel.textContent = " Hide white names";
+
+    hideWhiteNamesGroup.appendChild(hideWhiteNamesCheckbox);
+    hideWhiteNamesGroup.appendChild(hideWhiteNamesLabel);
+
     // Insert at end of settings form
     settingsForm.appendChild(sectionHeader);
     settingsForm.appendChild(formGroup);
+    settingsForm.appendChild(hideNewUsersGroup);
+    settingsForm.appendChild(hideWhiteNamesGroup);
   }
 
   // Start observing when DOM is ready
