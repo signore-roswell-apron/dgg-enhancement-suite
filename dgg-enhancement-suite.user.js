@@ -238,6 +238,7 @@ const main = function () {
     // Create DGG Enhancement Suite section
     const sectionHeader = document.createElement("h4");
     sectionHeader.textContent = "DGG Enhancement Suite";
+    sectionHeader.style.margin = "0 0 10px 0";
 
     const formGroup = document.createElement("div");
     formGroup.className = "form-group checkbox";
@@ -317,11 +318,16 @@ const main = function () {
     hideWhiteNamesGroup.appendChild(hideWhiteNamesCheckbox);
     hideWhiteNamesGroup.appendChild(hideWhiteNamesLabel);
 
-    // Insert at end of settings form
-    settingsForm.appendChild(sectionHeader);
-    settingsForm.appendChild(formGroup);
-    settingsForm.appendChild(hideNewUsersGroup);
-    settingsForm.appendChild(hideWhiteNamesGroup);
+    // Insert at top of settings form
+    const firstChild = settingsForm.firstChild;
+    const separator = document.createElement("div");
+    separator.style.borderBottom = "1px solid #333";
+    separator.style.margin = "10px 0";
+    settingsForm.insertBefore(sectionHeader, firstChild);
+    settingsForm.insertBefore(formGroup, firstChild);
+    settingsForm.insertBefore(hideNewUsersGroup, firstChild);
+    settingsForm.insertBefore(hideWhiteNamesGroup, firstChild);
+    settingsForm.insertBefore(separator, firstChild);
   }
 
   // Start observing when DOM is ready
